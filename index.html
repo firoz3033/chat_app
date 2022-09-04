@@ -7,33 +7,137 @@
 
 
     <style>
-      body { margin: 0;  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-
-#form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 12vh; box-sizing: border-box; backdrop-filter: blur(10px); max-width: 700px; margin: auto;}
-#input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
-#input:focus { outline: none; }
-#form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
-
-/* #messages { list-style-type: none; margin: 0; padding: 0; } */
-#messages > li { padding: 0.5rem 1rem; }
-#messages > li:nth-child(odd) { background: #efefef; }
-
-
-.container{
-  height: 88vh;
-  background:linear-gradient(red,yellow);
-  max-width: 700px;
-  margin: auto;
-  box-sizing: border-box;
-  padding-bottom: 10rem;
-  overflow-y: auto;
+    *{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
 }
-.msg{
-  height: 2rem;
-  background: rgb(195, 228, 230);
-  margin: 1rem;
+body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(rgb(119, 247, 240) ,rgb(200, 116, 248));
 
 }
+
+section.chat_section{
+    height: 100vh;
+    width: 90vh;
+    max-width: 90%;
+  background: linear-gradient(rgb(255, 105, 150),rgb(250, 188, 96));
+}
+.brand{
+  max-height: 6vh;
+    padding: 1.5rem;
+    background: rgb(236, 18, 182);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.brand h1{
+    text-transform: uppercase;
+    font-size: 2rem;
+    color: aliceblue;
+    margin-left: 1rem;
+
+}
+.message_area{
+    height: 83vh;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding-top: 3rem;
+
+}
+
+.message{
+    padding: 1rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    max-width: 20rem;
+    position: relative;
+    min-width: 10rem;
+    /* padding-top: 1.5rem; */
+}
+.incoming{
+    background: rgb(240, 223, 72);
+
+}
+.outgoing{
+    margin-left: auto;
+    background: rgb(106, 143, 245);
+}
+.notification{
+    margin: 0 auto;
+    background: rgb(123, 253, 106);
+    margin-bottom: 1rem;
+}
+.message h4{
+    position: absolute;
+    top: -2px;
+    left: 11px;
+    color: rgb(255, 255, 255);
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    
+}
+.message p {
+  font-size: 1.25rem;
+}
+.form{
+  height: 8vh;
+}
+.form>input{
+  height: 3rem;
+  width: 22rem;
+  border-radius: 20px;
+  border: none;
+  padding: 1rem;
+  margin-left: 2rem;
+  margin-right: 1rem;
+  outline: none;
+}
+/* .button{
+  height: 3rem;
+  width: 5rem;
+font-size: 2rem;
+border-radius: 100%;
+padding: 1rem;
+font-weight: bold;
+color: green;
+background: blue;
+border: none;
+} */
+
+
+
+
+
+
+
+@media screen and (max-width:500px) {
+    
+  section.chat_section{
+    width: 100vh;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+.message_area{
+    height: 88vh;
+   
+}
+.form>form>input{
+  margin-left: 1rem;
+  margin-right: 1rem;
+  
+}
+
+    
+}
+
 
     </style>
 
@@ -42,36 +146,106 @@
       
   </head>
   <body>
-    <div class="container" id="messages">
-      <div style="text-align:center; color: white; font-size: 20px; font-weight: bold;">Demo-chating</div>
-    </div>
-    <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
-    </form>
+    <section class="chat_section">
+      <div class="brand">
+          <img height="30" src="/logo.png" alt="image">
+          <h1>friya</h1>
+      </div>
+      <div class="message_area">
+          
+      </div>
+      <div class="form">
+            <input type="text" id="textarea"   placeholder="write message....">
+      </div>
+  </section>
 
     <script src="/socket.io/socket.io.js"></script>
+
+
+
+
+
+
+
+
 <script>
-  var socket = io();
+  const socket =io()
+let userName = prompt('enter your name')
+var messageArea = document.querySelector('.message_area')
+var textarea = document.querySelector('#textarea')
 
-  var messages = document.getElementById('messages');
-  var form = document.getElementById('form');
-  var input = document.getElementById('input');
+var audio = new Audio('/tone.mp3')
 
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    if (input.value) {
-      socket.emit('chat message', input.value);
-      input.value = '';
+
+textarea.addEventListener('keyup',(e)=>{
+    // e.preventDefault()
+    if (e.key ==='Enter'){
+        messageSend(e.target.value)
+        e.target.value=''
     }
-  });
 
-  socket.on('chat message', function(msg) {
-    var item = document.createElement('div');
-    item.textContent = msg;
-    item.classList.add('msg')
-    messages.appendChild(item);
-    window.scrollTo(0, document.body.scrollHeight);
-  });
+})
+
+function messageSend(message){
+    let msg = {
+        user:userName,
+        message: message
+    }
+    appendMessage(msg,'outgoing')
+
+
+    socket.emit('message', msg)
+}
+
+
+
+
+
+
+
+socket.emit('joined', userName)
+socket.on('joined' ,(userName)=>{
+    let msg_two = {
+        user: 'Settings',
+        message: `${userName} has joined the chat`
+    }
+    appendMessage( msg_two,'notification')
+})
+
+
+
+
+
+
+
+
+
+
+
+function appendMessage(msg , type){
+    let mainDiv = document.createElement('div')
+    let className = type
+    mainDiv.classList.add(className , 'message')
+
+    let markup = `
+    <h4>${msg.user}</h4>
+    <p>${msg.message}</p>
+    `
+
+    mainDiv.innerHTML = markup
+    messageArea.appendChild(mainDiv)
+
+    audio.play()
+}
+
+
+
+// socket
+
+socket.on('message', (msg)=>{
+    appendMessage(msg, 'incoming')
+    
+})
 </script>
   </body>
 </html>

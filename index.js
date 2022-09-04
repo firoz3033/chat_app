@@ -10,12 +10,29 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
+
+
+
+
+
 io.on('connection', (socket) => {
-    socket.on('chat message', msg => {
-      io.emit('chat message', msg);
-    });
+  socket.on('joined', (user)=>{
+    socket.broadcast.emit('joined',user);
+
+  })
+  socket.on('message', (msg) => {
+    console.log('message: ' + msg);
+    socket.broadcast.emit('message',msg);
   });
+});
+
+
+
+
+
+
 
 server.listen(port, () => {
   console.log('listening on '+port);
 });
+app.use(express.static(__dirname + '/public'))

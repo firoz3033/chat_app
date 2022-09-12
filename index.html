@@ -69,7 +69,7 @@ section.chat_section{
     /* padding-top: 1.5rem; */
 }
 .incoming{
-    background: rgb(240, 223, 72);
+    background: rgb(152, 243, 247);
 
 }
 .outgoing{
@@ -120,7 +120,45 @@ border: none;
 
 
 
+input[type="file"]{
+   display: none;
+ }
+ label{
+ position: relative;
+ left: -0.8rem;
+ bottom: -0.5rem;
+ }
+label>svg{
+  border: 1px solid green ;
+  border-radius: 30px;
+  padding: 2px;
+}
+span>svg{
+  border: 1px solid green ;
+  border-radius: 30px;
+  position: relative;
+  bottom: -0.5rem;
+  left: -0.8rem;
+  display: none;
 
+}
+.preview{
+  height: 50vh;
+
+  width: 50vh;
+  object-fit: cover;
+  border: none;
+  position: absolute;
+  margin: auto;
+}
+.image{
+  height: 14rem;
+  width: 14rem;
+  object-fit: cover;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: 2px solid white;
+}
 
 
 
@@ -162,8 +200,18 @@ border: none;
           
       </div>
       <div class="form">
-            <input type="text" id="textarea"   placeholder="write message....">
-      </div>
+        <input type="text" id="textarea"   placeholder="write message....">
+        <input type="file" id="files" accept="image/*">
+        <span>
+        <label for="files" class="label"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="green" class="bi bi-camera" viewBox="0 0 16 16">
+          <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
+          <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
+        </svg></label>
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="green" class="bi bi-send-fill send_btn" viewBox="0 0 16 16">
+          <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
+        </svg>
+      </span>
+  </div>
   </section>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -253,6 +301,67 @@ function appendMessage(msg , type){
 
     audio.play()
 }
+
+
+// ***************************************************************************************************
+// **********************************************************************************
+// ***************************************************************
+// image sender and receiver 
+
+var img_up = document.querySelector('#files')
+var img_up_div = document.querySelector('.image_come')
+
+img_up.addEventListener('change',(e)=>{
+    if(e.target.files.length == 0){
+        return;
+    }
+
+
+    var data = e.target.files[0];
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+      var msg = {};
+      msg.file = evt.target.result;
+      msg.fileName = userName;
+      socket.emit("base64 file", msg);
+
+      var data_i = {
+          'file':msg.file,
+          'fileName':userName
+      }
+      appendImage(data_i,'outgoing')
+    };
+    reader.readAsDataURL(data);
+
+    
+})
+
+
+
+
+function appendImage(img , type){
+    // if(!img.url){
+    //     return;
+    // }
+    let mainDiv = document.createElement('div')
+    let className = type
+    mainDiv.classList.add(className , 'message')
+    // mainDiv.setAttribute('src',img)
+    let send_data = `
+    <h4>${img.fileName}</h4>
+    <img src="${img.file}" class="image" >
+    `
+    mainDiv.innerHTML = send_data
+    
+    messageArea.appendChild(mainDiv)
+
+    
+}
+
+// receiving image
+socket.on('base64 file', (img_data)=>{
+    appendImage(img_data, 'incoming')
+})
 
 
 

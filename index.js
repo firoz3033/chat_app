@@ -19,11 +19,14 @@ io.on('connection', (socket) => {
   socket.on('joined', (user)=>{
     socket.broadcast.emit('joined',user);
 
-  })
+  });
   socket.on('message', (msg) => {
     console.log('message: ' + msg);
     socket.broadcast.emit('message',msg);
   });
+  socket.on('base64 file', (img_data)=>{
+    socket.broadcast.emit('base64 file', img_data)
+  })
 });
 
 
